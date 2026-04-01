@@ -6,8 +6,11 @@ __pycache__/
 venv/
 *.egg-info/
 
-# Data
+# Data - never push these
 data/raw/
+data/processed/
+data/models/
+*.csv
 *.zip
 
 # Models
@@ -23,3 +26,6 @@ dist/
 # IDE
 .vscode/
 .idea/
+
+# Jupyter
+.ipynb_checkpoints/
