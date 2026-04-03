@@ -1,6 +1,9 @@
 ﻿import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 import { Briefcase, Brain, Target, TrendingUp, ExternalLink, ChevronRight, RotateCcw } from "lucide-react";
+import CareerPath from "./CareerPath";
+import JobFilters from "./JobFilters";
+import { useState } from "react";
 
 function ScoreCard({ label, score, color }) {
   return (
@@ -50,7 +53,26 @@ function JobCard({ job }) {
 }
 
 export default function ResultsDashboard({ data, onReset }) {
-  const { classification, parsed_info, ats_score, skill_gap, improvement_suggestions, job_recommendations } = data;
+  const { classification, parsed_info, ats_score, skill_gap, improvement_suggestions, job_recommendations, career_path } = data;
+  const [jobs, setJobs] = useState(job_recommendations || []);
+  const [filtering, setFiltering] = useState(false);
+
+  const handleFilter = async (filters) => {
+    setFiltering(true);
+    try {
+      const response = await fetch("http://127.0.0.1:8000/api/v1/jobs/search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ skills: parsed_info.skills, category: classification.category, ...filters })
+      });
+      const result = await response.json();
+      setJobs(result.jobs || []);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setFiltering(false);
+    }
+  };
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -177,24 +199,29 @@ export default function ResultsDashboard({ data, onReset }) {
         </div>
       )}
 
-      {job_recommendations && job_recommendations.length > 0 && (
-        <div className="glass rounded-2xl p-6">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-xl bg-violet-500/20 flex items-center justify-center">
-              <Briefcase size={20} className="text-violet-400" />
-            </div>
-            <div>
-              <h3 className="text-white font-semibold">Job Recommendations</h3>
-              <p className="text-slate-500 text-xs">Real-time listings matched to your profile</p>
-            </div>
+      {career_path && <CareerPath data={career_path} />}
+
+      <div className="glass rounded-2xl p-6">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 rounded-xl bg-violet-500/20 flex items-center justify-center">
+            <Briefcase size={20} className="text-violet-400" />
           </div>
+          <div>
+            <h3 className="text-white font-semibold">Job Recommendations</h3>
+            <p className="text-slate-500 text-xs">Real-time listings matched to your profile</p>
+          </div>
+        </div>
+        <JobFilters onFilter={handleFilter} />
+        {filtering ? (
+          <div className="text-center py-8 text-slate-400 text-sm">Fetching filtered jobs...</div>
+        ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {job_recommendations.map((job, i) => (
+            {jobs.map((job, i) => (
               <JobCard key={i} job={job} />
             ))}
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

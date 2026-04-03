@@ -1,7 +1,3 @@
-"""
-CareerForge API Routes
-"""
-
 import os
 from fastapi import APIRouter, HTTPException, UploadFile, File
 from pydantic import BaseModel
@@ -11,20 +7,20 @@ from app.services.resume_parser import ResumeParser
 from app.services.skill_gap import SkillGapAnalyzer
 from app.services.ats_scorer import ATSScorer
 from app.services.job_recommender import JobRecommender
+from app.services.career_path import CareerPathSuggester
 from app.nlp.preprocessor import ResumePreprocessor
 
 router = APIRouter()
 
-# Fix model path
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 MODEL_DIR = os.path.join(BASE_DIR, "..", "data", "models")
 
-# Initialize services
 classifier = ResumeClassifier()
 parser = ResumeParser()
 skill_gap = SkillGapAnalyzer()
 ats_scorer = ATSScorer()
 job_recommender = JobRecommender()
+career_suggester = CareerPathSuggester()
 preprocessor = ResumePreprocessor()
 
 try:
@@ -50,7 +46,6 @@ class JobSearchInput(BaseModel):
 
 @router.post("/analyze")
 async def analyze_resume(resume: ResumeTextInput):
-    """Full resume analysis - classify, parse, ATS score, skill gap."""
     if not resume.text.strip():
         raise HTTPException(status_code=400, detail="Resume text cannot be empty")
     try:
@@ -59,15 +54,8 @@ async def analyze_resume(resume: ResumeTextInput):
         predicted_category = classification["category"]
         target_cat = resume.target_category or predicted_category
         gap_analysis = skill_gap.analyze(processed["skills"], target_cat)
-        suggestions = skill_gap.get_improvement_suggestions(
-            gap_analysis["missing_skills"], target_cat
-        )
-        ats_result = ats_scorer.score(
-            resume.text,
-            processed["skills"],
-            processed["education"],
-            processed["experience_years"] or 0
-        )
+        suggestions = skill_gap.get_improvement_suggestions(gap_analysis["missing_skills"], target_cat)
+        ats_result = ats_scorer.score(resume.text, processed["skills"], processed["education"], processed["experience_years"] or 0)
         return {
             "success": True,
             "data": {
@@ -90,7 +78,6 @@ async def analyze_resume(resume: ResumeTextInput):
 
 @router.post("/analyze-and-recommend")
 async def analyze_and_recommend(resume: ResumeTextInput):
-    """Full resume analysis + real-time job recommendations."""
     if not resume.text.strip():
         raise HTTPException(status_code=400, detail="Resume text cannot be empty")
     try:
@@ -99,20 +86,10 @@ async def analyze_and_recommend(resume: ResumeTextInput):
         predicted_category = classification["category"]
         target_cat = resume.target_category or predicted_category
         gap_analysis = skill_gap.analyze(processed["skills"], target_cat)
-        suggestions = skill_gap.get_improvement_suggestions(
-            gap_analysis["missing_skills"], target_cat
-        )
-        ats_result = ats_scorer.score(
-            resume.text,
-            processed["skills"],
-            processed["education"],
-            processed["experience_years"] or 0
-        )
-        # Fetch real-time jobs
-        jobs = await job_recommender.recommend(
-            skills=processed["skills"],
-            category=predicted_category
-        )
+        suggestions = skill_gap.get_improvement_suggestions(gap_analysis["missing_skills"], target_cat)
+        ats_result = ats_scorer.score(resume.text, processed["skills"], processed["education"], processed["experience_years"] or 0)
+        jobs = await job_recommender.recommend(skills=processed["skills"], category=predicted_category)
+        career_path = career_suggester.suggest(category=predicted_category, experience_years=processed["experience_years"] or 0, skills=processed["skills"])
         return {
             "success": True,
             "data": {
@@ -127,7 +104,8 @@ async def analyze_and_recommend(resume: ResumeTextInput):
                 "ats_score": ats_result,
                 "skill_gap": gap_analysis,
                 "improvement_suggestions": suggestions,
-                "job_recommendations": jobs
+                "job_recommendations": jobs,
+                "career_path": career_path
             }
         }
     except Exception as e:
@@ -136,7 +114,6 @@ async def analyze_and_recommend(resume: ResumeTextInput):
 
 @router.post("/jobs/search")
 async def search_jobs(job_input: JobSearchInput):
-    """Search for jobs based on skills and category."""
     try:
         jobs = await job_recommender.recommend(
             skills=job_input.skills,
@@ -146,18 +123,13 @@ async def search_jobs(job_input: JobSearchInput):
             salary_max=job_input.salary_max,
             results=job_input.results or 10
         )
-        return {
-            "success": True,
-            "total": len(jobs),
-            "jobs": jobs
-        }
+        return {"success": True, "total": len(jobs), "jobs": jobs}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/upload")
 async def upload_resume(file: UploadFile = File(...)):
-    """Upload PDF or DOCX resume file and analyze it."""
     allowed = [".pdf", ".docx", ".txt"]
     if not any(file.filename.lower().endswith(ext) for ext in allowed):
         raise HTTPException(status_code=400, detail="Only PDF, DOCX, TXT files allowed")
@@ -170,19 +142,10 @@ async def upload_resume(file: UploadFile = File(...)):
         classification = classifier.predict(text)
         predicted_category = classification["category"]
         gap_analysis = skill_gap.analyze(processed["skills"], predicted_category)
-        suggestions = skill_gap.get_improvement_suggestions(
-            gap_analysis["missing_skills"], predicted_category
-        )
-        ats_result = ats_scorer.score(
-            text,
-            processed["skills"],
-            processed["education"],
-            processed["experience_years"] or 0
-        )
-        jobs = await job_recommender.recommend(
-            skills=processed["skills"],
-            category=predicted_category
-        )
+        suggestions = skill_gap.get_improvement_suggestions(gap_analysis["missing_skills"], predicted_category)
+        ats_result = ats_scorer.score(text, processed["skills"], processed["education"], processed["experience_years"] or 0)
+        jobs = await job_recommender.recommend(skills=processed["skills"], category=predicted_category)
+        career_path = career_suggester.suggest(category=predicted_category, experience_years=processed["experience_years"] or 0, skills=processed["skills"])
         return {
             "success": True,
             "filename": file.filename,
@@ -198,7 +161,8 @@ async def upload_resume(file: UploadFile = File(...)):
                 "ats_score": ats_result,
                 "skill_gap": gap_analysis,
                 "improvement_suggestions": suggestions,
-                "job_recommendations": jobs
+                "job_recommendations": jobs,
+                "career_path": career_path
             }
         }
     except Exception as e:
@@ -207,7 +171,6 @@ async def upload_resume(file: UploadFile = File(...)):
 
 @router.post("/classify")
 def classify_resume(resume: ResumeTextInput):
-    """Classify a resume into a job category."""
     if not resume.text.strip():
         raise HTTPException(status_code=400, detail="Resume text cannot be empty")
     try:
@@ -219,12 +182,11 @@ def classify_resume(resume: ResumeTextInput):
 
 @router.get("/categories")
 def get_categories():
-    """Get all available job categories."""
     categories = [
-        'ACCOUNTANT', 'ADVOCATE', 'AGRICULTURE', 'APPAREL', 'ARTS',
-        'AUTOMOBILE', 'AVIATION', 'BANKING', 'BPO', 'BUSINESS-DEVELOPMENT',
-        'CHEF', 'CONSTRUCTION', 'CONSULTANT', 'DESIGNER', 'DIGITAL-MEDIA',
-        'ENGINEERING', 'FINANCE', 'FITNESS', 'HEALTHCARE', 'HR',
-        'INFORMATION-TECHNOLOGY', 'PUBLIC-RELATIONS', 'SALES', 'TEACHER'
+        "ACCOUNTANT", "ADVOCATE", "AGRICULTURE", "APPAREL", "ARTS",
+        "AUTOMOBILE", "AVIATION", "BANKING", "BPO", "BUSINESS-DEVELOPMENT",
+        "CHEF", "CONSTRUCTION", "CONSULTANT", "DESIGNER", "DIGITAL-MEDIA",
+        "ENGINEERING", "FINANCE", "FITNESS", "HEALTHCARE", "HR",
+        "INFORMATION-TECHNOLOGY", "PUBLIC-RELATIONS", "SALES", "TEACHER"
     ]
     return {"categories": categories, "total": len(categories)}
