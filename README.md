@@ -65,28 +65,32 @@ CareerForge is a full-stack AI-powered platform that analyzes resumes, scores th
 
 ---
 
+````markdown
 ## 🏗️ Architecture
+```text
 CareerForge/
-├── backend/                    # FastAPI Python Backend
+├── backend/                    FastAPI Python Backend
 │   └── app/
-│       ├── api/routes.py       # API endpoints
-│       ├── models/             # ML classifier
-│       ├── nlp/                # Preprocessing pipeline
-│       └── services/           # Business logic
-│           ├── resume_parser   # PDF/DOCX parsing
-│           ├── skill_gap       # Skill gap analysis
-│           ├── ats_scorer      # ATS compatibility
-│           ├── job_recommender # Adzuna API integration
-│           └── career_path     # Career roadmap
-├── frontend/                   # React + Vite + TailwindCSS
+│       ├── api/routes.py       API endpoints
+│       ├── models/             ML classifier
+│       ├── nlp/                Preprocessing pipeline
+│       └── services/
+│           ├── resume_parser   PDF/DOCX parsing
+│           ├── skill_gap       Skill gap analysis
+│           ├── ats_scorer      ATS compatibility
+│           ├── job_recommender Adzuna API integration
+│           └── career_path     Career roadmap
+├── frontend/                   React + Vite + TailwindCSS
 │   └── src/
-│       ├── components/         # UI components
-│       └── utils/api.js        # API client
+│       ├── components/         UI components
+│       └── utils/api.js        API client
 ├── data/
-│   ├── raw/                    # Kaggle dataset
-│   ├── processed/              # Preprocessed CSVs
-│   └── models/                 # Trained ML models
-└── notebooks/                  # EDA & experiments
+│   ├── raw/                    Kaggle dataset
+│   ├── processed/              Preprocessed CSVs
+│   └── models/                 Trained ML models
+└── notebooks/                  EDA & experiments
+```
+````
 
 ---
 
