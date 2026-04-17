@@ -8,6 +8,7 @@ from app.services.skill_gap import SkillGapAnalyzer
 from app.services.ats_scorer import ATSScorer
 from app.services.job_recommender import JobRecommender
 from app.services.career_path import CareerPathSuggester
+from app.services.database import save_analysis, get_recent_analyses, get_stats
 from app.nlp.preprocessor import ResumePreprocessor
 
 router = APIRouter()
@@ -90,24 +91,29 @@ async def analyze_and_recommend(resume: ResumeTextInput):
         ats_result = ats_scorer.score(resume.text, processed["skills"], processed["education"], processed["experience_years"] or 0)
         jobs = await job_recommender.recommend(skills=processed["skills"], category=predicted_category)
         career_path = career_suggester.suggest(category=predicted_category, experience_years=processed["experience_years"] or 0, skills=processed["skills"])
-        return {
-            "success": True,
-            "data": {
-                "classification": classification,
-                "parsed_info": {
-                    "skills": processed["skills"],
-                    "education": processed["education"],
-                    "experience_years": processed["experience_years"],
-                    "word_count": processed["word_count"],
-                    "entities": processed["entities"]
-                },
-                "ats_score": ats_result,
-                "skill_gap": gap_analysis,
-                "improvement_suggestions": suggestions,
-                "job_recommendations": jobs,
-                "career_path": career_path
-            }
+
+        result_data = {
+            "classification": classification,
+            "parsed_info": {
+                "skills": processed["skills"],
+                "education": processed["education"],
+                "experience_years": processed["experience_years"],
+                "word_count": processed["word_count"],
+                "entities": processed["entities"]
+            },
+            "ats_score": ats_result,
+            "skill_gap": gap_analysis,
+            "improvement_suggestions": suggestions,
+            "job_recommendations": jobs,
+            "career_path": career_path
         }
+
+        try:
+            await save_analysis(result_data)
+        except Exception:
+            pass
+
+        return {"success": True, "data": result_data}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -146,25 +152,29 @@ async def upload_resume(file: UploadFile = File(...)):
         ats_result = ats_scorer.score(text, processed["skills"], processed["education"], processed["experience_years"] or 0)
         jobs = await job_recommender.recommend(skills=processed["skills"], category=predicted_category)
         career_path = career_suggester.suggest(category=predicted_category, experience_years=processed["experience_years"] or 0, skills=processed["skills"])
-        return {
-            "success": True,
-            "filename": file.filename,
-            "data": {
-                "classification": classification,
-                "parsed_info": {
-                    "skills": processed["skills"],
-                    "education": processed["education"],
-                    "experience_years": processed["experience_years"],
-                    "word_count": processed["word_count"],
-                    "entities": processed["entities"]
-                },
-                "ats_score": ats_result,
-                "skill_gap": gap_analysis,
-                "improvement_suggestions": suggestions,
-                "job_recommendations": jobs,
-                "career_path": career_path
-            }
+
+        result_data = {
+            "classification": classification,
+            "parsed_info": {
+                "skills": processed["skills"],
+                "education": processed["education"],
+                "experience_years": processed["experience_years"],
+                "word_count": processed["word_count"],
+                "entities": processed["entities"]
+            },
+            "ats_score": ats_result,
+            "skill_gap": gap_analysis,
+            "improvement_suggestions": suggestions,
+            "job_recommendations": jobs,
+            "career_path": career_path
         }
+
+        try:
+            await save_analysis(result_data)
+        except Exception:
+            pass
+
+        return {"success": True, "filename": file.filename, "data": result_data}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -190,3 +200,21 @@ def get_categories():
         "INFORMATION-TECHNOLOGY", "PUBLIC-RELATIONS", "SALES", "TEACHER"
     ]
     return {"categories": categories, "total": len(categories)}
+
+
+@router.get("/history")
+async def get_history():
+    try:
+        analyses = await get_recent_analyses(limit=10)
+        return {"success": True, "total": len(analyses), "analyses": analyses}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/stats")
+async def get_statistics():
+    try:
+        stats = await get_stats()
+        return {"success": True, "stats": stats}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
