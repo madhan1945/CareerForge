@@ -1,39 +1,62 @@
-﻿import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
+import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 import { Briefcase, Brain, Target, TrendingUp, ExternalLink, ChevronRight, RotateCcw } from "lucide-react";
 import CareerPath from "./CareerPath";
 import JobFilters from "./JobFilters";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 function ScoreCard({ label, score, color }) {
+  const [displayScore, setDisplayScore] = useState(0);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDisplayScore(score), 300);
+    return () => clearTimeout(timer);
+  }, [score]);
+
   return (
-    <div className="glass rounded-2xl p-6 card-hover">
+    <div className="glass rounded-2xl p-6 card-hover animate-scale-in">
       <div className="w-24 h-24 mx-auto mb-4">
-        <CircularProgressbar value={score} text={`${score}%`} styles={buildStyles({ textColor: "#f8fafc", pathColor: color, trailColor: "rgba(255,255,255,0.1)", textSize: "20px" })} />
+        <CircularProgressbar
+          value={displayScore}
+          text={`${displayScore}%`}
+          styles={buildStyles({
+            textColor: "#f8fafc",
+            pathColor: color,
+            trailColor: "rgba(255,255,255,0.1)",
+            textSize: "20px",
+            pathTransitionDuration: 1.2,
+          })}
+        />
       </div>
       <p className="text-center text-slate-400 text-sm font-medium">{label}</p>
     </div>
   );
 }
 
-function SkillBadge({ skill, type }) {
+function SkillBadge({ skill, type, delay = 0 }) {
   const colors = {
     matched: "bg-emerald-500/10 border-emerald-500/30 text-emerald-400",
     missing: "bg-red-500/10 border-red-500/30 text-red-400",
     found: "bg-sky-500/10 border-sky-500/30 text-sky-400",
   };
   return (
-    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${colors[type]}`}>
+    <span
+      className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${colors[type]} animate-fade-in-up opacity-0`}
+      style={{ animationFillMode: "forwards", animationDelay: `${delay}ms` }}
+    >
       {skill}
     </span>
   );
 }
 
-function JobCard({ job }) {
+function JobCard({ job, delay = 0 }) {
   return (
-    <div className="glass rounded-2xl p-5 card-hover">
+    <div
+      className="glass rounded-2xl p-5 card-hover animate-fade-in-up opacity-0"
+      style={{ animationFillMode: "forwards", animationDelay: `${delay}ms` }}
+    >
       <div className="flex items-start justify-between mb-3">
-        <div>
+        <div className="flex-1 mr-2">
           <h4 className="text-white font-semibold text-sm">{job.title}</h4>
           <p className="text-slate-400 text-xs mt-1">{job.company}</p>
         </div>
@@ -43,11 +66,33 @@ function JobCard({ job }) {
       </div>
       <p className="text-slate-500 text-xs mb-3 line-clamp-2">{job.description}</p>
       <div className="flex items-center justify-between">
-        <span className="text-slate-500 text-xs">📍 {job.location}</span>
-        <a href={job.apply_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sky-400 hover:text-sky-300 text-xs font-medium transition-colors">
+        <span className="text-slate-500 text-xs truncate mr-2">📍 {job.location}</span>
+        <a
+          href={job.apply_url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1 text-sky-400 hover:text-sky-300 text-xs font-medium transition-colors flex-shrink-0"
+        >
           Apply <ExternalLink size={10} />
         </a>
       </div>
+    </div>
+  );
+}
+
+function AnimatedBar({ value, delay = 0 }) {
+  const [width, setWidth] = useState(0);
+  useEffect(() => {
+    const timer = setTimeout(() => setWidth(value), delay + 200);
+    return () => clearTimeout(timer);
+  }, [value, delay]);
+
+  return (
+    <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
+      <div
+        className="h-full rounded-full bg-gradient-to-r from-sky-500 to-indigo-500 transition-all duration-1000 ease-out"
+        style={{ width: `${width}%` }}
+      />
     </div>
   );
 }
@@ -75,28 +120,33 @@ export default function ResultsDashboard({ data, onReset }) {
   };
 
   return (
-    <div className="max-w-6xl mx-auto">
-      <div className="flex items-center justify-between mb-8">
+    <div className="max-w-6xl mx-auto px-2 md:px-0">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-8 animate-fade-in-up">
         <div>
-          <h2 className="text-3xl font-bold text-white">Analysis Complete</h2>
-          <p className="text-slate-400 mt-1">Here is your personalized career report</p>
+          <h2 className="text-2xl md:text-3xl font-bold text-white">Analysis Complete</h2>
+          <p className="text-slate-400 mt-1 text-sm">Here is your personalized career report</p>
         </div>
-        <button onClick={onReset} className="flex items-center gap-2 px-4 py-2 glass rounded-xl text-slate-400 hover:text-white transition-colors text-sm">
+        <button
+          onClick={onReset}
+          className="flex items-center gap-2 px-3 md:px-4 py-2 glass rounded-xl text-slate-400 hover:text-white transition-all hover:scale-105 text-xs md:text-sm"
+        >
           <RotateCcw size={14} />
-          New Analysis
+          <span className="hide-mobile">New Analysis</span>
         </button>
       </div>
 
+      {/* Classification + ATS Score */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div className="glass rounded-2xl p-6 md:col-span-2">
+        <div className="glass rounded-2xl p-6 md:col-span-2 animate-fade-in-up" style={{ animationDelay: "100ms" }}>
           <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 rounded-xl bg-indigo-500/20 flex items-center justify-center">
               <Brain size={20} className="text-indigo-400" />
             </div>
             <h3 className="text-white font-semibold">Classification</h3>
           </div>
-          <div className="flex items-center gap-4">
-            <span className="text-3xl font-bold gradient-text">{classification.category}</span>
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="text-2xl md:text-3xl font-bold gradient-text">{classification.category}</span>
             <span className="px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-emerald-400 text-xs">AI Predicted</span>
           </div>
           <div className="grid grid-cols-3 gap-4 mt-6">
@@ -114,10 +164,13 @@ export default function ResultsDashboard({ data, onReset }) {
             </div>
           </div>
         </div>
-        <ScoreCard label="ATS Score" score={Math.round(ats_score.overall_score)} color="#0ea5e9" />
+        <div className="animate-fade-in-up" style={{ animationDelay: "200ms" }}>
+          <ScoreCard label="ATS Score" score={Math.round(ats_score.overall_score)} color="#0ea5e9" />
+        </div>
       </div>
 
-      <div className="glass rounded-2xl p-6 mb-6">
+      {/* ATS Breakdown */}
+      <div className="glass rounded-2xl p-6 mb-6 animate-fade-in-up" style={{ animationDelay: "300ms" }}>
         <div className="flex items-center gap-3 mb-6">
           <div className="w-10 h-10 rounded-xl bg-sky-500/20 flex items-center justify-center">
             <TrendingUp size={20} className="text-sky-400" />
@@ -125,23 +178,21 @@ export default function ResultsDashboard({ data, onReset }) {
           <h3 className="text-white font-semibold">ATS Score Breakdown</h3>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {Object.entries(ats_score.breakdown).map(([key, value]) => (
+          {Object.entries(ats_score.breakdown).map(([key, value], i) => (
             <div key={key}>
               <div className="flex justify-between mb-2">
                 <span className="text-slate-400 text-xs capitalize">{key}</span>
                 <span className="text-white text-xs font-medium">{value}%</span>
               </div>
-              <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
-                <div className="h-full rounded-full bg-gradient-to-r from-sky-500 to-indigo-500 transition-all" style={{ width: `${value}%` }} />
-              </div>
+              <AnimatedBar value={value} delay={i * 100} />
             </div>
           ))}
         </div>
         {ats_score.feedback.length > 0 && (
           <div className="mt-6 space-y-2">
             {ats_score.feedback.map((fb, i) => (
-              <div key={i} className="flex items-center gap-2 text-amber-400 text-xs">
-                <ChevronRight size={12} />
+              <div key={i} className="flex items-start gap-2 text-amber-400 text-xs animate-slide-in-right" style={{ animationDelay: `${i * 100}ms` }}>
+                <ChevronRight size={12} className="mt-0.5 flex-shrink-0" />
                 {fb}
               </div>
             ))}
@@ -149,8 +200,9 @@ export default function ResultsDashboard({ data, onReset }) {
         )}
       </div>
 
+      {/* Skills + Skill Gap */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        <div className="glass rounded-2xl p-6">
+        <div className="glass rounded-2xl p-6 animate-fade-in-up" style={{ animationDelay: "400ms" }}>
           <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center">
               <Target size={20} className="text-emerald-400" />
@@ -159,11 +211,12 @@ export default function ResultsDashboard({ data, onReset }) {
           </div>
           <div className="flex flex-wrap gap-2">
             {parsed_info.skills.map((skill, i) => (
-              <SkillBadge key={i} skill={skill} type="found" />
+              <SkillBadge key={i} skill={skill} type="found" delay={i * 50} />
             ))}
           </div>
         </div>
-        <div className="glass rounded-2xl p-6">
+
+        <div className="glass rounded-2xl p-6 animate-fade-in-up" style={{ animationDelay: "500ms" }}>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-red-500/20 flex items-center justify-center">
@@ -173,25 +226,24 @@ export default function ResultsDashboard({ data, onReset }) {
             </div>
             <span className="text-xs text-slate-500">{skill_gap.match_score}% match</span>
           </div>
-          <div className="h-1.5 bg-white/10 rounded-full overflow-hidden mb-4">
-            <div className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-sky-500" style={{ width: `${skill_gap.match_score}%` }} />
-          </div>
-          <p className="text-slate-400 text-xs mb-3">Missing skills:</p>
+          <AnimatedBar value={skill_gap.match_score} />
+          <p className="text-slate-400 text-xs mb-3 mt-4">Missing skills:</p>
           <div className="flex flex-wrap gap-2">
             {skill_gap.missing_skills.slice(0, 8).map((skill, i) => (
-              <SkillBadge key={i} skill={skill} type="missing" />
+              <SkillBadge key={i} skill={skill} type="missing" delay={i * 50} />
             ))}
           </div>
         </div>
       </div>
 
+      {/* Improvement Suggestions */}
       {improvement_suggestions.length > 0 && (
-        <div className="glass rounded-2xl p-6 mb-6">
+        <div className="glass rounded-2xl p-6 mb-6 animate-fade-in-up" style={{ animationDelay: "600ms" }}>
           <h3 className="text-white font-semibold mb-4">💡 Improvement Suggestions</h3>
           <div className="space-y-2">
             {improvement_suggestions.map((s, i) => (
-              <div key={i} className="flex items-start gap-3 text-slate-400 text-sm">
-                <span className="text-sky-400 mt-0.5">→</span>
+              <div key={i} className="flex items-start gap-3 text-slate-400 text-sm animate-slide-in-right" style={{ animationDelay: `${i * 80}ms` }}>
+                <span className="text-sky-400 mt-0.5 flex-shrink-0">→</span>
                 {s}
               </div>
             ))}
@@ -199,9 +251,15 @@ export default function ResultsDashboard({ data, onReset }) {
         </div>
       )}
 
-      {career_path && <CareerPath data={career_path} />}
+      {/* Career Path */}
+      {career_path && (
+        <div className="animate-fade-in-up" style={{ animationDelay: "700ms" }}>
+          <CareerPath data={career_path} />
+        </div>
+      )}
 
-      <div className="glass rounded-2xl p-6">
+      {/* Job Recommendations */}
+      <div className="glass rounded-2xl p-6 animate-fade-in-up" style={{ animationDelay: "800ms" }}>
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 rounded-xl bg-violet-500/20 flex items-center justify-center">
             <Briefcase size={20} className="text-violet-400" />
@@ -213,11 +271,15 @@ export default function ResultsDashboard({ data, onReset }) {
         </div>
         <JobFilters onFilter={handleFilter} />
         {filtering ? (
-          <div className="text-center py-8 text-slate-400 text-sm">Fetching filtered jobs...</div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {[1,2,3,4].map(i => (
+              <div key={i} className="shimmer rounded-2xl h-32" />
+            ))}
+          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {jobs.map((job, i) => (
-              <JobCard key={i} job={job} />
+              <JobCard key={i} job={job} delay={i * 80} />
             ))}
           </div>
         )}
