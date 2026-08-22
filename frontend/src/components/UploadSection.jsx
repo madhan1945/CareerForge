@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
-import { Upload, Loader2, Sparkles, FileText, CheckCircle, ArrowRight, Zap, Target, Shield, Users, HelpCircle, MessageSquare, Briefcase, Award } from "lucide-react";
+import { Upload, Loader2, Sparkles, FileText, CheckCircle, ArrowRight, Zap, Target, Shield, Users, HelpCircle, Brain, TrendingUp } from "lucide-react";
 import { uploadResume, analyzeResume } from "../utils/api";
 
 export default function UploadSection({ onResult }) {
@@ -10,8 +10,6 @@ export default function UploadSection({ onResult }) {
   const [error, setError] = useState("");
   const [uploadedFile, setUploadedFile] = useState(null);
   const [loadingStep, setLoadingStep] = useState("");
-  
-  // FAQ accordion state
   const [activeFaq, setActiveFaq] = useState(null);
 
   const steps = [
@@ -103,135 +101,145 @@ export default function UploadSection({ onResult }) {
   ];
 
   return (
-    <div className="w-full space-y-24">
-      {/* Decorative ambient orbs */}
-      <div className="orb orb-1 opacity-20 pointer-events-none" />
-      <div className="orb orb-2 opacity-20 pointer-events-none" />
+    <div className="w-full space-y-28 pt-8">
+      {/* Decorative ambient orbs (translucent glow) */}
+      <div className="orb orb-1 opacity-20 pointer-events-none filter blur-[120px]" />
+      <div className="orb orb-2 opacity-20 pointer-events-none filter blur-[120px]" />
 
-      {/* SECTION 1: HERO & INTERACTIVE WIDGET */}
-      <section className="max-w-7xl mx-auto px-4 md:px-6">
+      {/* SECTION 1: HERO & INTERACTIVE PARSER */}
+      <section className="max-w-6xl mx-auto px-4 md:px-6">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           
-          {/* Hero Copy (5 Columns) */}
-          <div className="lg:col-span-5 space-y-6 text-left">
-            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-sky-500/10 to-indigo-500/10 border border-sky-500/20 rounded-full px-4 py-1.5 animate-pulse-glow">
-              <Sparkles size={13} className="text-sky-400" />
-              <span className="text-sky-400 text-[10px] font-bold uppercase tracking-wider">Enterprise Ready Recruiting</span>
+          {/* Hero Value Prop (5 Columns) */}
+          <div className="lg:col-span-5 space-y-6 text-left animate-fade-in-up">
+            
+            {/* Pill Badge with pulse dot */}
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-white/10 bg-slate-950/40 text-[11px] font-medium text-slate-300 backdrop-blur-sm shadow-inner shadow-white/5 animate-pulse-glow">
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+              ✨ Enterprise Ready AI Recruiting
             </div>
 
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.1]">
-              Accelerate Your <br />
-              <span className="gradient-text">Hiring Pipeline</span>
+            {/* Title with sleek cyan-to-violet gradient */}
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight text-white leading-[1.05]">
+              Forge Your <br />
+              <span className="bg-gradient-to-r from-cyan-400 via-indigo-400 to-violet-500 bg-clip-text text-transparent">
+                Hiring Pipeline
+              </span>
             </h1>
 
-            <p className="text-slate-400 text-sm md:text-base leading-relaxed max-w-lg">
-              Forge resumes, score ATS compatibility, analyze skill gaps, and match candidate embeddings against job roles semantically. Powered by scikit-learn & Google Gemini.
+            {/* Muted Description */}
+            <p className="text-slate-400 text-sm leading-relaxed max-w-md">
+              Extract resume skills, grade ATS compliance, scan technical gaps, and match candidate embeddings semantically. Powered by scikit-learn & Google Gemini.
             </p>
 
-            {/* Feature List */}
-            <div className="space-y-3 pt-2 text-slate-300">
-              <div className="flex items-center gap-2.5">
-                <div className="w-4.5 h-4.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 text-xs">✓</div>
-                <span className="text-xs font-semibold">Trained ML Classification Models</span>
-              </div>
-              <div className="flex items-center gap-2.5">
-                <div className="w-4.5 h-4.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 text-xs">✓</div>
-                <span className="text-xs font-semibold">Interactive Career Roadmapping</span>
-              </div>
-              <div className="flex items-center gap-2.5">
-                <div className="w-4.5 h-4.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 text-xs">✓</div>
-                <span className="text-xs font-semibold">LLM Recruiter Justifications</span>
-              </div>
+            {/* Glowing Micro-Card Highlights */}
+            <div className="grid grid-cols-1 gap-3 pt-2">
+              {[
+                { icon: <Sparkles size={14} className="text-cyan-400" />, title: "Neural Skill Extraction", desc: "spaCy-driven entity and technology classification" },
+                { icon: <TrendingUp size={14} className="text-indigo-400" />, title: "ATS Scorer & Grading", desc: "Structure audits and formatting optimization suggestions" },
+                { icon: <Brain size={14} className="text-violet-400" />, title: "LLM Justification Report", desc: "Detailed match justifications using semantic scoring" }
+              ].map((item, i) => (
+                <div key={i} className="flex items-center gap-3.5 p-3 rounded-2xl border border-white/5 bg-slate-950/20 backdrop-blur-sm card-hover">
+                  <div className="w-8 h-8 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shadow-inner shadow-white/5">
+                    {item.icon}
+                  </div>
+                  <div>
+                    <h5 className="text-xs font-bold text-white">{item.title}</h5>
+                    <p className="text-[10px] text-slate-500 mt-0.5">{item.desc}</p>
+                  </div>
+                </div>
+              ))}
             </div>
 
-            {/* Key Trust Stats */}
-            <div className="grid grid-cols-3 gap-4 pt-6 border-t border-white/5 max-w-md">
-              <div>
-                <p className="text-2xl font-bold text-white">2.4k+</p>
-                <p className="text-slate-500 text-[9px] uppercase font-extrabold tracking-wider mt-0.5">Resumes Evaluated</p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-white">95%</p>
-                <p className="text-slate-500 text-[9px] uppercase font-extrabold tracking-wider mt-0.5">Precision Metric</p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-white">&lt; 3s</p>
-                <p className="text-slate-500 text-[9px] uppercase font-extrabold tracking-wider mt-0.5">Analysis Time</p>
-              </div>
+            {/* Metrics Counters cards */}
+            <div className="grid grid-cols-3 gap-3 pt-6 border-t border-white/5 max-w-md">
+              {[
+                { value: "2.4k+", label: "Resumes Trained" },
+                { value: "95.8%", label: "Precision Rate" },
+                { value: "< 3s", label: "Analysis Latency" }
+              ].map((m, idx) => (
+                <div key={idx} className="p-3.5 rounded-2xl border border-white/5 bg-slate-950/30 text-left">
+                  <p className="text-2xl font-black text-white bg-gradient-to-br from-white to-slate-400 bg-clip-text text-transparent">{m.value}</p>
+                  <p className="text-[9px] font-extrabold uppercase tracking-widest text-slate-500 mt-1">{m.label}</p>
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* Interactive Parser Widget (7 Columns) */}
-          <div className="lg:col-span-7 w-full">
-            <div className="glass rounded-3xl p-6 md:p-8 shadow-2xl border border-white/10 relative overflow-hidden">
-              <div className="absolute -top-24 -right-24 w-48 h-48 bg-sky-500/10 rounded-full filter blur-3xl pointer-events-none" />
+          {/* Right Column: Interactive Dropzone Card (7 Columns) */}
+          <div className="lg:col-span-7 w-full relative group">
+            {/* Ambient Radial Glow underneath the card */}
+            <div className="absolute -inset-1 rounded-3xl bg-gradient-to-tr from-cyan-500/10 to-indigo-500/10 opacity-30 blur-2xl group-hover:opacity-40 transition-opacity duration-500" />
+            
+            <div className="relative glass rounded-3xl p-6 md:p-8 shadow-2xl border border-white/10 overflow-hidden bg-slate-950/40 backdrop-blur-md">
               
-              {/* Tab options */}
-              <div className="flex gap-2 mb-6 bg-slate-950/40 border border-white/5 rounded-2xl p-1">
+              {/* Tab Mode Switcher */}
+              <div className="flex bg-black/40 border border-white/5 rounded-2xl p-1 mb-6">
                 <button
                   onClick={() => { setActiveTab("upload"); setError(""); }}
-                  className={`flex-1 py-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
+                  className={`flex-grow py-3 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
                     activeTab === "upload"
-                      ? "bg-sky-500 text-white shadow-lg shadow-sky-500/20"
-                      : "text-slate-400 hover:text-white hover:bg-white/5"
+                      ? "bg-white/10 text-white shadow-inner shadow-white/10 border border-white/5"
+                      : "text-slate-400 hover:text-white"
                   }`}
                 >
-                  <Upload size={14} />
+                  <Upload size={13} />
                   Upload Document
                 </button>
                 <button
                   onClick={() => { setActiveTab("paste"); setError(""); }}
-                  className={`flex-1 py-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
+                  className={`flex-grow py-3 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
                     activeTab === "paste"
-                      ? "bg-sky-500 text-white shadow-lg shadow-sky-500/20"
-                      : "text-slate-400 hover:text-white hover:bg-white/5"
+                      ? "bg-white/10 text-white shadow-inner shadow-white/10 border border-white/5"
+                      : "text-slate-400 hover:text-white"
                   }`}
                 >
-                  <FileText size={14} />
+                  <FileText size={13} />
                   Paste Plain Text
                 </button>
               </div>
 
-              {/* Upload Panel */}
+              {/* Upload Drag & Drop Panel */}
               {activeTab === "upload" ? (
                 <div
                   {...getRootProps()}
-                  className={`glass rounded-2xl p-10 text-center cursor-pointer transition-all border-2 border-dashed relative group min-h-[280px] flex flex-col justify-center items-center ${
+                  className={`glass rounded-2xl p-10 text-center cursor-pointer transition-all border-2 border-dashed relative min-h-[280px] flex flex-col justify-center items-center ${
                     isDragActive
-                      ? "border-sky-500 bg-sky-500/5 scale-[1.01]"
-                      : "border-white/10 hover:border-sky-500/40 hover:bg-white/5"
+                      ? "border-cyan-500/60 bg-cyan-500/5 scale-[1.01]"
+                      : "border-white/10 hover:border-cyan-500/30 hover:bg-white/5"
                   }`}
                 >
                   <input {...getInputProps()} />
                   {loading ? (
                     <div className="flex flex-col items-center gap-4 w-full max-w-sm">
                       <div className="relative">
-                        <Loader2 size={40} className="text-sky-500 animate-spin" />
+                        <Loader2 size={36} className="text-cyan-400 animate-spin" />
                         <div className="absolute inset-0 rounded-full animate-pulse-glow" />
                       </div>
-                      <p className="text-sky-400 font-semibold text-xs">{loadingStep || "Analyzing..."}</p>
-                      <div className="w-40 h-1 bg-white/10 rounded-full overflow-hidden mt-1">
-                        <div className="h-full bg-gradient-to-r from-sky-500 to-indigo-500 rounded-full animate-pulse w-3/4" />
+                      <p className="text-cyan-400 font-semibold text-xs tracking-wider uppercase">{loadingStep || "Processing..."}</p>
+                      <div className="w-40 h-0.5 bg-white/10 rounded-full overflow-hidden mt-1">
+                        <div className="h-full bg-gradient-to-r from-cyan-400 to-indigo-500 rounded-full animate-pulse w-3/4" />
                       </div>
                     </div>
                   ) : uploadedFile ? (
                     <div className="flex flex-col items-center gap-3 animate-scale-in">
-                      <CheckCircle size={40} className="text-emerald-400" />
+                      <CheckCircle size={36} className="text-emerald-400" />
                       <p className="text-white font-semibold text-xs">{uploadedFile.name}</p>
-                      <p className="text-slate-500 text-[10px]">Document successfully uploaded</p>
+                      <p className="text-slate-500 text-[10px]">Ready to process</p>
                     </div>
                   ) : (
                     <div className="flex flex-col items-center gap-4">
-                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-sky-500/10 to-indigo-500/10 border border-sky-500/20 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
-                        <Upload size={24} className="text-sky-400" />
+                      {/* ACCENTED CIRCULAR CONTAINER */}
+                      <div className="w-14 h-14 rounded-full border border-white/10 bg-white/5 flex items-center justify-center group-hover:scale-105 duration-300">
+                        <Upload size={22} className="text-cyan-400" />
                       </div>
                       <div>
                         <p className="text-white font-bold text-sm">
-                          {isDragActive ? "Drop the resume here!" : "Drag & drop your resume file"}
+                          {isDragActive ? "Drop the file here!" : "Drag & drop your resume file"}
                         </p>
-                        <p className="text-slate-500 text-[11px] mt-1">PDF, DOCX, or TXT • Max 10MB</p>
+                        <p className="text-slate-500 text-[10px] mt-1">PDF, DOCX, or TXT • Max 10MB</p>
                       </div>
-                      <button className="px-5 py-2 bg-sky-500 hover:bg-sky-600 text-white rounded-xl text-xs font-bold transition-all hover:scale-105 active:scale-95 shadow-md shadow-sky-500/10">
+                      <button className="px-5 py-2.5 bg-gradient-to-r from-cyan-400 to-indigo-500 text-white rounded-xl text-xs font-bold transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-cyan-500/10">
                         Select File
                       </button>
                     </div>
@@ -251,7 +259,7 @@ export default function UploadSection({ onResult }) {
                     <button
                       onClick={handleTextAnalyze}
                       disabled={!text.trim() || loading}
-                      className="flex items-center gap-1.5 px-5 py-2 bg-sky-500 hover:bg-sky-600 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl text-xs font-bold transition-all hover:scale-105 active:scale-95"
+                      className="flex items-center gap-1.5 px-5 py-2 bg-white text-black hover:bg-slate-200 disabled:opacity-40 disabled:cursor-not-allowed rounded-xl text-xs font-bold transition-all hover:scale-[1.02] active:scale-[0.98]"
                     >
                       {loading ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
                       {loading ? loadingStep || "Analyzing..." : "Analyze"}
@@ -274,7 +282,7 @@ export default function UploadSection({ onResult }) {
 
       {/* SECTION 2: HOW IT WORKS */}
       <section className="max-w-6xl mx-auto px-4 text-center">
-        <div className="mb-12">
+        <div className="mb-14">
           <h2 className="text-2xl md:text-3xl font-extrabold text-white">How CareerForge Works</h2>
           <p className="text-slate-400 text-xs md:text-sm mt-2 max-w-lg mx-auto">
             A simplified, intelligent, three-step pipeline built to optimize job matches and shortlist top talents.
@@ -299,9 +307,9 @@ export default function UploadSection({ onResult }) {
               desc: "Compare candidates against custom job details using local vector embeddings and Google Gemini for ranked shortlists with justifications."
             }
           ].map((s, idx) => (
-            <div key={idx} className="glass rounded-3xl p-6 relative border border-white/5 hover:border-white/10 transition-all text-left">
-              <span className="text-5xl font-black text-white/5 absolute right-6 top-6 select-none">{s.step}</span>
-              <div className="w-8 h-8 rounded-lg bg-sky-500/10 flex items-center justify-center text-sky-400 font-extrabold text-sm mb-4">
+            <div key={idx} className="glass rounded-3xl p-6.5 relative border border-white/5 hover:border-white/10 hover:bg-white/5 transition-all text-left group">
+              <span className="text-5xl font-black text-white/5 absolute right-6 top-6 select-none group-hover:text-white/10 transition-colors duration-300">{s.step}</span>
+              <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 font-extrabold text-sm mb-4">
                 {idx + 1}
               </div>
               <h4 className="text-white font-bold text-base mb-2">{s.title}</h4>
@@ -311,10 +319,10 @@ export default function UploadSection({ onResult }) {
         </div>
       </section>
 
-      {/* SECTION 3: DEEP TECH MATRIX (CAPABILITIES) */}
+      {/* SECTION 3: PRODUCT MATRIX */}
       <section className="max-w-6xl mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <div>
+          <div className="text-left">
             <h2 className="text-2xl md:text-3xl font-extrabold text-white">Advanced Product Capabilities</h2>
             <p className="text-slate-400 text-sm mt-3 leading-relaxed">
               CareerForge features a state-of-the-art classifier trained on thousands of resumes across 24 job categories. We combine machine learning with advanced LLM reasoning to ensure robust matching results.
@@ -336,6 +344,7 @@ export default function UploadSection({ onResult }) {
               ))}
             </div>
           </div>
+          
           <div className="glass rounded-3xl p-6 border border-white/5 bg-gradient-to-br from-white/5 to-transparent relative min-h-[300px] flex items-center justify-center">
             {/* Mock Dashboard Preview */}
             <div className="w-full space-y-3">
@@ -436,7 +445,7 @@ export default function UploadSection({ onResult }) {
                 className="w-full p-5 text-left text-white font-semibold text-xs md:text-sm flex justify-between items-center bg-white/5 hover:bg-white/10 transition-colors"
               >
                 <span>{faq.q}</span>
-                <span className="text-sky-400 text-base">{activeFaq === idx ? "−" : "+"}</span>
+                <span className="text-cyan-400 text-base">{activeFaq === idx ? "−" : "+"}</span>
               </button>
               {activeFaq === idx && (
                 <div className="p-5 text-slate-400 text-xs leading-relaxed bg-slate-900/30 border-t border-white/5 animate-fade-in">
@@ -453,7 +462,7 @@ export default function UploadSection({ onResult }) {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center">
+              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-cyan-400 to-indigo-500 flex items-center justify-center">
                 <Briefcase size={14} className="text-white" />
               </div>
               <span className="text-base font-bold text-white">CareerForge</span>
