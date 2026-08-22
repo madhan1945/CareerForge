@@ -11,7 +11,7 @@ export default function App() {
   const [viewMode, setViewMode] = useState("candidate");
 
   return (
-    <div className="min-h-screen bg-dark-200">
+    <div className="min-h-screen bg-[#0a0d14] bg-grid-pattern relative">
       <Navbar
         onHistoryClick={() => setShowHistory(true)}
         currentView={viewMode}
