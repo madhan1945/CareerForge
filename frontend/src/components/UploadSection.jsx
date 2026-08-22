@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
-import { Upload, Loader2, Sparkles, FileText, CheckCircle, ArrowRight, Zap, Target, Shield, Users, HelpCircle, Brain, TrendingUp } from "lucide-react";
+import { Upload, Loader2, Sparkles, FileText, CheckCircle, ArrowRight, Zap, Target, Shield, Users, HelpCircle, Brain, TrendingUp, Briefcase } from "lucide-react";
 import { uploadResume, analyzeResume } from "../utils/api";
 
 export default function UploadSection({ onResult }) {
