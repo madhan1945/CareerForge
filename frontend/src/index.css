@@ -12,9 +12,18 @@
 
 body {
   font-family: "Inter", sans-serif;
-  background-color: #0f172a;
+  background-color: #0a0d14;
   color: #f8fafc;
   min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+.bg-grid-pattern {
+  background-size: 40px 40px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
 }
 
 /* Scrollbar */
