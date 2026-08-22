@@ -1,15 +1,16 @@
 import os
 from fastapi import APIRouter, HTTPException, UploadFile, File
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 from app.models.classifier import ResumeClassifier
 from app.services.resume_parser import ResumeParser
 from app.services.skill_gap import SkillGapAnalyzer
 from app.services.ats_scorer import ATSScorer
 from app.services.job_recommender import JobRecommender
 from app.services.career_path import CareerPathSuggester
-from app.services.database import save_analysis, get_recent_analyses, get_stats
+from app.services.database import save_analysis, get_recent_analyses, get_stats, get_all_candidates
 from app.nlp.preprocessor import ResumePreprocessor
+from app.services.llm_matcher import LLMMatcher
 
 router = APIRouter()
 
@@ -23,6 +24,7 @@ ats_scorer = ATSScorer()
 job_recommender = JobRecommender()
 career_suggester = CareerPathSuggester()
 preprocessor = ResumePreprocessor()
+llm_matcher = LLMMatcher()
 
 try:
     classifier.load(model_dir=MODEL_DIR)
@@ -43,6 +45,11 @@ class JobSearchInput(BaseModel):
     salary_min: Optional[int] = None
     salary_max: Optional[int] = None
     results: Optional[int] = 10
+
+
+class ShortlistInput(BaseModel):
+    job_description: str
+    candidate_ids: Optional[List[str]] = None
 
 
 @router.post("/analyze")
@@ -93,6 +100,8 @@ async def analyze_and_recommend(resume: ResumeTextInput):
         career_path = career_suggester.suggest(category=predicted_category, experience_years=processed["experience_years"] or 0, skills=processed["skills"])
 
         result_data = {
+            "raw_text": resume.text,
+            "filename": "Pasted Resume",
             "classification": classification,
             "parsed_info": {
                 "skills": processed["skills"],
@@ -154,6 +163,8 @@ async def upload_resume(file: UploadFile = File(...)):
         career_path = career_suggester.suggest(category=predicted_category, experience_years=processed["experience_years"] or 0, skills=processed["skills"])
 
         result_data = {
+            "raw_text": text,
+            "filename": file.filename,
             "classification": classification,
             "parsed_info": {
                 "skills": processed["skills"],
@@ -216,5 +227,62 @@ async def get_statistics():
     try:
         stats = await get_stats()
         return {"success": True, "stats": stats}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/shortlist")
+async def shortlist_candidates(input_data: ShortlistInput):
+    if not input_data.job_description.strip():
+        raise HTTPException(status_code=400, detail="Job description cannot be empty")
+    try:
+        # Fetch all candidate analyses from database
+        all_candidates = await get_all_candidates()
+        
+        # If candidate_ids is provided, filter them
+        if input_data.candidate_ids:
+            all_candidates = [c for c in all_candidates if c["_id"] in input_data.candidate_ids]
+            
+        if not all_candidates:
+            return {"success": True, "candidates": []}
+            
+        results = []
+        for candidate in all_candidates:
+            # We need raw_text to perform semantic matching
+            resume_text = candidate.get("raw_text") or ""
+            # If raw text was not saved previously, reconstruct it using their skills and category (fallback)
+            if not resume_text:
+                resume_text = f"Candidate Profile. Category: {candidate.get('category')}. Skills: {', '.join(candidate.get('skills', []))}."
+                
+            # Perform match
+            match_res = await llm_matcher.match_candidate(resume_text, input_data.job_description)
+            
+            results.append({
+                "id": candidate["_id"],
+                "candidate_name": candidate.get("candidate_name") or candidate.get("filename", "Candidate"),
+                "filename": candidate.get("filename", "Pasted Resume"),
+                "category": candidate.get("category"),
+                "ats_score": candidate.get("ats_score", 0),
+                "ats_grade": candidate.get("ats_grade", "N/A"),
+                "semantic_score": match_res["score"],
+                "justification": match_res["justification"],
+                "is_llm": match_res["is_llm"],
+                "skills": candidate.get("skills", []),
+                "experience_years": candidate.get("experience_years", 0),
+                "timestamp": candidate.get("timestamp")
+            })
+            
+        # Sort candidates by semantic score in descending order
+        results.sort(key=lambda x: x["semantic_score"], reverse=True)
+        return {"success": True, "candidates": results}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/candidates")
+async def list_candidates():
+    try:
+        candidates = await get_all_candidates()
+        return {"success": True, "candidates": candidates}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
