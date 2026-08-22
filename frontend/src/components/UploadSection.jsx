@@ -307,13 +307,13 @@ export default function UploadSection({ onResult }) {
               desc: "Compare candidates against custom job details using local vector embeddings and Google Gemini for ranked shortlists with justifications."
             }
           ].map((s, idx) => (
-            <div key={idx} className="glass rounded-3xl p-6.5 relative border border-white/5 hover:border-white/10 hover:bg-white/5 transition-all text-left group">
+            <div key={idx} className="glass rounded-3xl p-8 relative border border-white/5 hover:border-white/10 hover:bg-white/5 transition-all text-left group overflow-hidden">
               <span className="text-5xl font-black text-white/5 absolute right-6 top-6 select-none group-hover:text-white/10 transition-colors duration-300">{s.step}</span>
-              <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 font-extrabold text-sm mb-4">
+              <div className="w-8 h-8 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 font-bold text-xs mb-4">
                 {idx + 1}
               </div>
               <h4 className="text-white font-bold text-base mb-2">{s.title}</h4>
-              <p className="text-slate-500 text-xs leading-relaxed">{s.desc}</p>
+              <p className="text-slate-400 text-xs leading-relaxed">{s.desc}</p>
             </div>
           ))}
         </div>
