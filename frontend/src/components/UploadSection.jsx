@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
-import { Upload, Loader2, Sparkles, FileText, CheckCircle, ArrowRight, Zap, Target, Shield, Users } from "lucide-react";
+import { Upload, Loader2, Sparkles, FileText, CheckCircle, ArrowRight, Zap, Target, Shield, Users, HelpCircle, MessageSquare, Briefcase, Award } from "lucide-react";
 import { uploadResume, analyzeResume } from "../utils/api";
 
 export default function UploadSection({ onResult }) {
@@ -10,6 +10,9 @@ export default function UploadSection({ onResult }) {
   const [error, setError] = useState("");
   const [uploadedFile, setUploadedFile] = useState(null);
   const [loadingStep, setLoadingStep] = useState("");
+  
+  // FAQ accordion state
+  const [activeFaq, setActiveFaq] = useState(null);
 
   const steps = [
     "Parsing resume document...",
@@ -80,213 +83,423 @@ export default function UploadSection({ onResult }) {
     }
   };
 
+  const faqs = [
+    {
+      q: "How does the ATS scoring algorithm work?",
+      a: "Our ATS compatibility engine evaluates resume layout parameters (like word count and structure), contact details presence, keyword densities, and matches your skills against industry standards. It outputs a score and actionable improvements."
+    },
+    {
+      q: "What is LLM Semantic Matching?",
+      a: "Unlike traditional keyword-matching systems, CareerForge uses vector embedding semantic models (and optional Google Gemini support) to evaluate the deeper meaning and experience context of a resume relative to a job description. This provides highly accurate shortlisting with natural text justifications."
+    },
+    {
+      q: "Is my personal data secure?",
+      a: "Yes. All resumes processed through CareerForge are stored securely in your private database. We do not sell, rent, or share candidate data with external organizations."
+    },
+    {
+      q: "How does the recruiter portal work?",
+      a: "Recruiters can enter any custom job description, choose which parsed candidates in the system to evaluate, and immediately retrieve a ranked candidate leaderboard with detailed AI justifications explaining why each candidate matches the role."
+    }
+  ];
+
   return (
-    <div className="max-w-6xl mx-auto w-full px-4 py-8 animate-fade-in-up">
-      {/* Decorative background orbs */}
+    <div className="w-full space-y-24">
+      {/* Decorative ambient orbs */}
       <div className="orb orb-1 opacity-20 pointer-events-none" />
       <div className="orb orb-2 opacity-20 pointer-events-none" />
 
-      {/* Main Grid Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-        
-        {/* Left Side: SaaS Pitch & Copy (5 Columns) */}
-        <div className="lg:col-span-5 space-y-6 text-left">
-          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-sky-500/10 to-indigo-500/10 border border-sky-500/20 rounded-full px-4.5 py-1.5 animate-pulse-glow">
-            <Sparkles size={14} className="text-sky-400" />
-            <span className="text-sky-400 text-xs font-semibold uppercase tracking-wider">CareerForge AI v2.0</span>
+      {/* SECTION 1: HERO & INTERACTIVE WIDGET */}
+      <section className="max-w-7xl mx-auto px-4 md:px-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          
+          {/* Hero Copy (5 Columns) */}
+          <div className="lg:col-span-5 space-y-6 text-left">
+            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-sky-500/10 to-indigo-500/10 border border-sky-500/20 rounded-full px-4 py-1.5 animate-pulse-glow">
+              <Sparkles size={13} className="text-sky-400" />
+              <span className="text-sky-400 text-[10px] font-bold uppercase tracking-wider">Enterprise Ready Recruiting</span>
+            </div>
+
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.1]">
+              Accelerate Your <br />
+              <span className="gradient-text">Hiring Pipeline</span>
+            </h1>
+
+            <p className="text-slate-400 text-sm md:text-base leading-relaxed max-w-lg">
+              Forge resumes, score ATS compatibility, analyze skill gaps, and match candidate embeddings against job roles semantically. Powered by scikit-learn & Google Gemini.
+            </p>
+
+            {/* Feature List */}
+            <div className="space-y-3 pt-2 text-slate-300">
+              <div className="flex items-center gap-2.5">
+                <div className="w-4.5 h-4.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 text-xs">✓</div>
+                <span className="text-xs font-semibold">Trained ML Classification Models</span>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <div className="w-4.5 h-4.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 text-xs">✓</div>
+                <span className="text-xs font-semibold">Interactive Career Roadmapping</span>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <div className="w-4.5 h-4.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 text-xs">✓</div>
+                <span className="text-xs font-semibold">LLM Recruiter Justifications</span>
+              </div>
+            </div>
+
+            {/* Key Trust Stats */}
+            <div className="grid grid-cols-3 gap-4 pt-6 border-t border-white/5 max-w-md">
+              <div>
+                <p className="text-2xl font-bold text-white">2.4k+</p>
+                <p className="text-slate-500 text-[9px] uppercase font-extrabold tracking-wider mt-0.5">Resumes Evaluated</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-white">95%</p>
+                <p className="text-slate-500 text-[9px] uppercase font-extrabold tracking-wider mt-0.5">Precision Metric</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-white">&lt; 3s</p>
+                <p className="text-slate-500 text-[9px] uppercase font-extrabold tracking-wider mt-0.5">Analysis Time</p>
+              </div>
+            </div>
           </div>
 
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight">
-            Forge Your <br />
-            <span className="gradient-text">Dream Career</span>
-          </h1>
-
-          <p className="text-slate-400 text-base md:text-lg leading-relaxed">
-            The next-generation AI platform for candidates and recruiters. Scan resumes, score ATS compatibility, analyze skill gaps, and short-list applicants in seconds.
-          </p>
-
-          {/* Feature List */}
-          <div className="space-y-3.5 pt-2">
-            <div className="flex items-center gap-3 text-slate-300">
-              <div className="w-5 h-5 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
-                ✓
+          {/* Interactive Parser Widget (7 Columns) */}
+          <div className="lg:col-span-7 w-full">
+            <div className="glass rounded-3xl p-6 md:p-8 shadow-2xl border border-white/10 relative overflow-hidden">
+              <div className="absolute -top-24 -right-24 w-48 h-48 bg-sky-500/10 rounded-full filter blur-3xl pointer-events-none" />
+              
+              {/* Tab options */}
+              <div className="flex gap-2 mb-6 bg-slate-950/40 border border-white/5 rounded-2xl p-1">
+                <button
+                  onClick={() => { setActiveTab("upload"); setError(""); }}
+                  className={`flex-1 py-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
+                    activeTab === "upload"
+                      ? "bg-sky-500 text-white shadow-lg shadow-sky-500/20"
+                      : "text-slate-400 hover:text-white hover:bg-white/5"
+                  }`}
+                >
+                  <Upload size={14} />
+                  Upload Document
+                </button>
+                <button
+                  onClick={() => { setActiveTab("paste"); setError(""); }}
+                  className={`flex-1 py-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
+                    activeTab === "paste"
+                      ? "bg-sky-500 text-white shadow-lg shadow-sky-500/20"
+                      : "text-slate-400 hover:text-white hover:bg-white/5"
+                  }`}
+                >
+                  <FileText size={14} />
+                  Paste Plain Text
+                </button>
               </div>
-              <span className="text-sm font-medium">Deep Neural Skill Extraction</span>
-            </div>
-            <div className="flex items-center gap-3 text-slate-300">
-              <div className="w-5 h-5 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
-                ✓
-              </div>
-              <span className="text-sm font-medium">ATS Compatibility Scoring & Grading</span>
-            </div>
-            <div className="flex items-center gap-3 text-slate-300">
-              <div className="w-5 h-5 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
-                ✓
-              </div>
-              <span className="text-sm font-medium">LLM-Powered Semantic Matching & Justification</span>
-            </div>
-          </div>
 
-          {/* Metrics Counters */}
-          <div className="grid grid-cols-3 gap-4 pt-6 border-t border-white/5">
-            <div>
-              <p className="text-2xl font-bold text-white">2.4k+</p>
-              <p className="text-slate-500 text-[10px] uppercase font-bold tracking-wider mt-0.5">Resumes Trained</p>
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-white">95%+</p>
-              <p className="text-slate-500 text-[10px] uppercase font-bold tracking-wider mt-0.5">Precision Rate</p>
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-white">A/B Grade</p>
-              <p className="text-slate-500 text-[10px] uppercase font-bold tracking-wider mt-0.5">Average Score</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Side: Interactive AI Upload Widget (7 Columns) */}
-        <div className="lg:col-span-7 w-full">
-          <div className="glass rounded-3xl p-6 md:p-8 shadow-2xl border border-white/10 relative overflow-hidden shadow-sky-500/5">
-            {/* Glowing background gradient inside the card */}
-            <div className="absolute -top-24 -right-24 w-48 h-48 bg-sky-500/10 rounded-full filter blur-3xl pointer-events-none" />
-            
-            {/* Tab switchers */}
-            <div className="flex gap-2 mb-6 bg-slate-950/40 border border-white/5 rounded-2xl p-1">
-              <button
-                onClick={() => { setActiveTab("upload"); setError(""); }}
-                className={`flex-1 py-3 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 ${
-                  activeTab === "upload"
-                    ? "bg-sky-500 text-white shadow-lg shadow-sky-500/20"
-                    : "text-slate-400 hover:text-white hover:bg-white/5"
-                }`}
-              >
-                <Upload size={15} />
-                Upload Resume
-              </button>
-              <button
-                onClick={() => { setActiveTab("paste"); setError(""); }}
-                className={`flex-1 py-3 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 ${
-                  activeTab === "paste"
-                    ? "bg-sky-500 text-white shadow-lg shadow-sky-500/20"
-                    : "text-slate-400 hover:text-white hover:bg-white/5"
-                }`}
-              >
-                <FileText size={15} />
-                Paste Resume Text
-              </button>
-            </div>
-
-            {/* Upload Tab Container */}
-            {activeTab === "upload" ? (
-              <div
-                {...getRootProps()}
-                className={`glass rounded-2xl p-12 text-center cursor-pointer transition-all border-2 border-dashed relative group overflow-hidden min-h-[300px] flex flex-col justify-center items-center ${
-                  isDragActive
-                    ? "border-sky-500 bg-sky-500/5 scale-[1.02]"
-                    : "border-white/10 hover:border-sky-500/40 hover:bg-white/5"
-                }`}
-              >
-                <input {...getInputProps()} />
-                {loading ? (
-                  <div className="flex flex-col items-center gap-4 animate-fade-in w-full max-w-sm">
-                    <div className="relative">
-                      <Loader2 size={44} className="text-sky-500 animate-spin" />
-                      <div className="absolute inset-0 rounded-full animate-pulse-glow" />
+              {/* Upload Panel */}
+              {activeTab === "upload" ? (
+                <div
+                  {...getRootProps()}
+                  className={`glass rounded-2xl p-10 text-center cursor-pointer transition-all border-2 border-dashed relative group min-h-[280px] flex flex-col justify-center items-center ${
+                    isDragActive
+                      ? "border-sky-500 bg-sky-500/5 scale-[1.01]"
+                      : "border-white/10 hover:border-sky-500/40 hover:bg-white/5"
+                  }`}
+                >
+                  <input {...getInputProps()} />
+                  {loading ? (
+                    <div className="flex flex-col items-center gap-4 w-full max-w-sm">
+                      <div className="relative">
+                        <Loader2 size={40} className="text-sky-500 animate-spin" />
+                        <div className="absolute inset-0 rounded-full animate-pulse-glow" />
+                      </div>
+                      <p className="text-sky-400 font-semibold text-xs">{loadingStep || "Analyzing..."}</p>
+                      <div className="w-40 h-1 bg-white/10 rounded-full overflow-hidden mt-1">
+                        <div className="h-full bg-gradient-to-r from-sky-500 to-indigo-500 rounded-full animate-pulse w-3/4" />
+                      </div>
                     </div>
-                    <p className="text-sky-400 font-semibold text-sm">{loadingStep || "Analyzing..."}</p>
-                    <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden mt-2">
-                      <div className="h-full bg-gradient-to-r from-sky-500 to-indigo-500 rounded-full animate-pulse w-3/4" />
+                  ) : uploadedFile ? (
+                    <div className="flex flex-col items-center gap-3 animate-scale-in">
+                      <CheckCircle size={40} className="text-emerald-400" />
+                      <p className="text-white font-semibold text-xs">{uploadedFile.name}</p>
+                      <p className="text-slate-500 text-[10px]">Document successfully uploaded</p>
                     </div>
-                  </div>
-                ) : uploadedFile ? (
-                  <div className="flex flex-col items-center gap-3 animate-scale-in">
-                    <CheckCircle size={44} className="text-emerald-400" />
-                    <p className="text-white font-semibold text-sm">{uploadedFile.name}</p>
-                    <p className="text-slate-500 text-xs">Upload completed! Processing details...</p>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center gap-4">
-                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-sky-500/10 to-indigo-500/10 border border-sky-500/20 flex items-center justify-center transition-transform group-hover:scale-105 duration-300">
-                      <Upload size={26} className="text-sky-400" />
+                  ) : (
+                    <div className="flex flex-col items-center gap-4">
+                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-sky-500/10 to-indigo-500/10 border border-sky-500/20 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
+                        <Upload size={24} className="text-sky-400" />
+                      </div>
+                      <div>
+                        <p className="text-white font-bold text-sm">
+                          {isDragActive ? "Drop the resume here!" : "Drag & drop your resume file"}
+                        </p>
+                        <p className="text-slate-500 text-[11px] mt-1">PDF, DOCX, or TXT • Max 10MB</p>
+                      </div>
+                      <button className="px-5 py-2 bg-sky-500 hover:bg-sky-600 text-white rounded-xl text-xs font-bold transition-all hover:scale-105 active:scale-95 shadow-md shadow-sky-500/10">
+                        Select File
+                      </button>
                     </div>
-                    <div>
-                      <p className="text-white font-semibold text-base">
-                        {isDragActive ? "Drop the file here!" : "Drag & drop your resume file"}
-                      </p>
-                      <p className="text-slate-500 text-xs mt-1">Accepts PDF, DOCX, or TXT • Max 10MB</p>
-                    </div>
-                    <button className="px-6 py-2.5 bg-sky-500 hover:bg-sky-600 text-white rounded-xl text-xs font-semibold transition-all hover:scale-105 active:scale-95 shadow-md shadow-sky-500/10 mt-2">
-                      Browse Files
+                  )}
+                </div>
+              ) : (
+                /* Paste Panel */
+                <div className="glass rounded-2xl p-4 border border-white/10 animate-scale-in flex flex-col min-h-[280px]">
+                  <textarea
+                    value={text}
+                    onChange={(e) => setText(e.target.value)}
+                    placeholder="Paste plain resume text details here..."
+                    className="w-full flex-1 min-h-[180px] bg-transparent text-slate-300 placeholder-slate-600 resize-none outline-none text-xs leading-relaxed"
+                  />
+                  <div className="flex justify-between items-center mt-3 pt-3 border-t border-white/5">
+                    <span className="text-slate-500 text-xs">{text.length} characters</span>
+                    <button
+                      onClick={handleTextAnalyze}
+                      disabled={!text.trim() || loading}
+                      className="flex items-center gap-1.5 px-5 py-2 bg-sky-500 hover:bg-sky-600 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl text-xs font-bold transition-all hover:scale-105 active:scale-95"
+                    >
+                      {loading ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
+                      {loading ? loadingStep || "Analyzing..." : "Analyze"}
                     </button>
                   </div>
-                )}
-              </div>
-            ) : (
-              /* Paste Text Tab Container */
-              <div className="glass rounded-2xl p-5 border border-white/10 animate-scale-in flex flex-col min-h-[300px]">
-                <textarea
-                  value={text}
-                  onChange={(e) => setText(e.target.value)}
-                  placeholder="Paste your plain text resume content here..."
-                  className="w-full flex-1 min-h-[200px] bg-transparent text-slate-300 placeholder-slate-600 resize-none outline-none text-sm leading-relaxed"
-                />
-                <div className="flex justify-between items-center mt-4 pt-4 border-t border-white/5">
-                  <span className="text-slate-500 text-xs font-medium">{text.length} characters</span>
-                  <button
-                    onClick={handleTextAnalyze}
-                    disabled={!text.trim() || loading}
-                    className="flex items-center gap-2 px-6 py-2.5 bg-sky-500 hover:bg-sky-600 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl text-xs font-semibold transition-all hover:scale-105 active:scale-95"
-                  >
-                    {loading ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} />}
-                    {loading ? loadingStep || "Analyzing..." : "Analyze Resume"}
-                  </button>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Error Message */}
-            {error && (
-              <div className="mt-4 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-xs text-center animate-fade-in flex items-center justify-center gap-2">
-                <span className="text-sm font-bold">⚠️</span>
-                <span>{error}</span>
-              </div>
-            )}
+              {error && (
+                <div className="mt-4 p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-xs text-center flex items-center justify-center gap-2">
+                  <span>⚠️</span>
+                  <span>{error}</span>
+                </div>
+              )}
+            </div>
           </div>
+
+        </div>
+      </section>
+
+      {/* SECTION 2: HOW IT WORKS */}
+      <section className="max-w-6xl mx-auto px-4 text-center">
+        <div className="mb-12">
+          <h2 className="text-2xl md:text-3xl font-extrabold text-white">How CareerForge Works</h2>
+          <p className="text-slate-400 text-xs md:text-sm mt-2 max-w-lg mx-auto">
+            A simplified, intelligent, three-step pipeline built to optimize job matches and shortlist top talents.
+          </p>
         </div>
 
-      </div>
-
-      {/* Feature Section Cards (Bottom) */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16 pt-8 border-t border-white/5">
-        {[
-          {
-            icon: <Target className="text-sky-400" size={20} />,
-            title: "ATS Optimizer Score",
-            desc: "Instantly grade your resume layout, content depth, keywords, and density against global ATS parser rules."
-          },
-          {
-            icon: <Zap className="text-sky-400" size={20} />,
-            title: "Semantic Gap Scanning",
-            desc: "Find missing technologies and domain skills required for your dream job and get instant upgrade suggestions."
-          },
-          {
-            icon: <Users className="text-sky-400" size={20} />,
-            title: "Recruiter Portal",
-            desc: "Shortlist multiple candidates semantically against custom job profiles and auto-generate AI justifications."
-          }
-        ].map((f, i) => (
-          <div
-            key={i}
-            className="glass rounded-2xl p-5 border border-white/5 text-left card-hover"
-          >
-            <div className="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center mb-4">
-              {f.icon}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {[
+            {
+              step: "01",
+              title: "Upload & Parse",
+              desc: "Drag in your PDF/DOCX. Our NLP parser uses spaCy to instantly extract entities, locations, education, and years of experience."
+            },
+            {
+              step: "02",
+              title: "ATS & Gap Scan",
+              desc: "The system grades formatting, keyword density, and checks for skill gaps, suggesting resources and technical areas to improve."
+            },
+            {
+              step: "03",
+              title: "Semantic Match",
+              desc: "Compare candidates against custom job details using local vector embeddings and Google Gemini for ranked shortlists with justifications."
+            }
+          ].map((s, idx) => (
+            <div key={idx} className="glass rounded-3xl p-6 relative border border-white/5 hover:border-white/10 transition-all text-left">
+              <span className="text-5xl font-black text-white/5 absolute right-6 top-6 select-none">{s.step}</span>
+              <div className="w-8 h-8 rounded-lg bg-sky-500/10 flex items-center justify-center text-sky-400 font-extrabold text-sm mb-4">
+                {idx + 1}
+              </div>
+              <h4 className="text-white font-bold text-base mb-2">{s.title}</h4>
+              <p className="text-slate-500 text-xs leading-relaxed">{s.desc}</p>
             </div>
-            <h4 className="text-white font-bold text-base mb-1.5">{f.title}</h4>
-            <p className="text-slate-500 text-xs leading-relaxed">{f.desc}</p>
+          ))}
+        </div>
+      </section>
+
+      {/* SECTION 3: DEEP TECH MATRIX (CAPABILITIES) */}
+      <section className="max-w-6xl mx-auto px-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div>
+            <h2 className="text-2xl md:text-3xl font-extrabold text-white">Advanced Product Capabilities</h2>
+            <p className="text-slate-400 text-sm mt-3 leading-relaxed">
+              CareerForge features a state-of-the-art classifier trained on thousands of resumes across 24 job categories. We combine machine learning with advanced LLM reasoning to ensure robust matching results.
+            </p>
+            
+            <div className="mt-8 space-y-4">
+              {[
+                { title: "TF-IDF + LinearSVC Classifier", desc: "Our best-performing category classifier maintains a high cross-validation F1-score of 0.712." },
+                { title: "Dynamic Career Roadmap Generator", desc: "Auto-maps your experience years to junior, mid, senior, or lead tiers, outlining skills to acquire." },
+                { title: "Recruiter Leaderboards", desc: "Rank multiple applicants against any job description, sort by cosine semantic similarity, and display justifications." }
+              ].map((cap, i) => (
+                <div key={i} className="flex gap-4 items-start">
+                  <div className="w-5 h-5 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 mt-1 flex-shrink-0">✓</div>
+                  <div>
+                    <h5 className="text-white font-bold text-sm">{cap.title}</h5>
+                    <p className="text-slate-500 text-xs mt-1 leading-relaxed">{cap.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-        ))}
-      </div>
+          <div className="glass rounded-3xl p-6 border border-white/5 bg-gradient-to-br from-white/5 to-transparent relative min-h-[300px] flex items-center justify-center">
+            {/* Mock Dashboard Preview */}
+            <div className="w-full space-y-3">
+              <div className="flex items-center justify-between border-b border-white/5 pb-2.5">
+                <span className="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Candidate Rank</span>
+                <span className="text-slate-500 text-xs">Leaderboard Preview</span>
+              </div>
+              <div className="p-3 bg-sky-500/10 border border-sky-500/20 rounded-xl flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-sky-500 text-white font-bold text-xs flex items-center justify-center">#1</div>
+                  <div>
+                    <p className="text-white font-bold text-xs">Jane Doe</p>
+                    <p className="text-slate-400 text-[10px]">Data Scientist • 4 yrs exp</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <span className="px-2 py-0.5 bg-emerald-500/25 text-emerald-400 rounded-full font-bold text-[9px]">94% Match</span>
+                </div>
+              </div>
+              <div className="p-3 bg-white/5 rounded-xl flex items-center justify-between opacity-80">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-slate-800 text-white font-bold text-xs flex items-center justify-center">#2</div>
+                  <div>
+                    <p className="text-white font-semibold text-xs">John Smith</p>
+                    <p className="text-slate-500 text-[10px]">ML Engineer • 2 yrs exp</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <span className="px-2 py-0.5 bg-sky-500/20 text-sky-400 rounded-full font-bold text-[9px]">81% Match</span>
+                </div>
+              </div>
+              <div className="p-3 bg-slate-900/40 rounded-xl flex items-center justify-between opacity-50">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-slate-950 text-white font-bold text-xs flex items-center justify-center">#3</div>
+                  <div>
+                    <p className="text-white text-xs">Alice Johnson</p>
+                    <p className="text-slate-500 text-[10px]">Python Developer • 1 yr exp</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <span className="px-2 py-0.5 bg-amber-500/20 text-amber-400 rounded-full font-bold text-[9px]">62% Match</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION 4: TESTIMONIALS */}
+      <section className="max-w-6xl mx-auto px-4 text-center">
+        <div className="mb-12">
+          <h2 className="text-2xl md:text-3xl font-extrabold text-white">Loved by Candidates & Recruiters</h2>
+          <p className="text-slate-400 text-xs md:text-sm mt-2">
+            See how CareerForge helps talent optimize resumes and assists HR departments in finding top matching professionals.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="glass rounded-3xl p-6 text-left border border-white/5 bg-gradient-to-br from-white/5 to-transparent flex flex-col justify-between">
+            <p className="text-slate-300 text-xs md:text-sm italic leading-relaxed">
+              "As a job seeker, the ATS checker pointed out formatting errors I was completely unaware of. The skill gap roadmap suggested I learn Kubernetes, which directly helped me pass my technical interview for my current cloud developer role!"
+            </p>
+            <div className="flex items-center gap-3 mt-6 border-t border-white/5 pt-4">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-sky-400 to-indigo-500 flex items-center justify-center text-white font-bold text-sm">
+                MK
+              </div>
+              <div>
+                <h5 className="text-white font-bold text-xs">Manoj Kumar</h5>
+                <p className="text-slate-500 text-[10px]">Full Stack Python Developer</p>
+              </div>
+            </div>
+          </div>
+          <div className="glass rounded-3xl p-6 text-left border border-white/5 bg-gradient-to-br from-white/5 to-transparent flex flex-col justify-between">
+            <p className="text-slate-300 text-xs md:text-sm italic leading-relaxed">
+              "We process over 50 resumes a week. With the Recruiter Portal's semantic shortlisting and Gemini justifications, we can filter applicants and draft justifications for our client shortlist reports in minutes instead of hours."
+            </p>
+            <div className="flex items-center gap-3 mt-6 border-t border-white/5 pt-4">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-emerald-400 to-teal-500 flex items-center justify-center text-white font-bold text-sm">
+                SP
+              </div>
+              <div>
+                <h5 className="text-white font-bold text-xs">Sneha Patel</h5>
+                <p className="text-slate-500 text-[10px]">Lead Technical Recruiter, TechCorp</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION 5: FAQS */}
+      <section className="max-w-3xl mx-auto px-4">
+        <h2 className="text-2xl md:text-3xl font-extrabold text-white text-center mb-8">Frequently Asked Questions</h2>
+        <div className="space-y-3">
+          {faqs.map((faq, idx) => (
+            <div key={idx} className="glass rounded-2xl border border-white/5 overflow-hidden transition-all duration-300">
+              <button
+                onClick={() => setActiveFaq(activeFaq === idx ? null : idx)}
+                className="w-full p-5 text-left text-white font-semibold text-xs md:text-sm flex justify-between items-center bg-white/5 hover:bg-white/10 transition-colors"
+              >
+                <span>{faq.q}</span>
+                <span className="text-sky-400 text-base">{activeFaq === idx ? "−" : "+"}</span>
+              </button>
+              {activeFaq === idx && (
+                <div className="p-5 text-slate-400 text-xs leading-relaxed bg-slate-900/30 border-t border-white/5 animate-fade-in">
+                  {faq.a}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* SECTION 6: FOOTER */}
+      <footer className="max-w-7xl mx-auto px-6 border-t border-white/5 pt-12 pb-8 text-left mt-24">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center">
+                <Briefcase size={14} className="text-white" />
+              </div>
+              <span className="text-base font-bold text-white">CareerForge</span>
+            </div>
+            <p className="text-slate-500 text-[11px] leading-relaxed max-w-[200px]">
+              AI-Powered Resume Analysis, ATS Compatibility Scorer, and semantic candidate matching.
+            </p>
+          </div>
+          <div>
+            <h5 className="text-white font-bold text-xs uppercase tracking-wider mb-4">Features</h5>
+            <ul className="space-y-2 text-slate-500 text-xs">
+              <li><a href="#" className="hover:text-white transition-colors">Resume Parsing</a></li>
+              <li><a href="#" className="hover:text-white transition-colors">ATS Optimization</a></li>
+              <li><a href="#" className="hover:text-white transition-colors">Skill Gap Scanner</a></li>
+              <li><a href="#" className="hover:text-white transition-colors">Recruiter Shortlist</a></li>
+            </ul>
+          </div>
+          <div>
+            <h5 className="text-white font-bold text-xs uppercase tracking-wider mb-4">Tech Stack</h5>
+            <ul className="space-y-2 text-slate-500 text-xs">
+              <li><a href="https://fastapi.tiangolo.com" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">FastAPI (Python)</a></li>
+              <li><a href="https://react.dev" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">React & Tailwind</a></li>
+              <li><a href="https://scikit-learn.org" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">scikit-learn Classifier</a></li>
+              <li><a href="https://ai.google.dev" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">Google Gemini API</a></li>
+            </ul>
+          </div>
+          <div>
+            <h5 className="text-white font-bold text-xs uppercase tracking-wider mb-4">Open Source</h5>
+            <ul className="space-y-2 text-slate-500 text-xs">
+              <li><a href="https://github.com/madhan1945/CareerForge" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">GitHub Repository</a></li>
+              <li><a href="https://github.com/madhan1945/CareerForge/issues" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">Submit an Issue</a></li>
+              <li><a href="https://github.com/madhan1945/CareerForge/pulls" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">Pull Requests</a></li>
+              <li><a href="https://github.com/madhan1945" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">Creator Profile</a></li>
+            </ul>
+          </div>
+        </div>
+        
+        <div className="flex flex-col md:flex-row justify-between items-center mt-12 pt-6 border-t border-white/5 gap-4">
+          <p className="text-slate-600 text-[10px]">&copy; 2026 CareerForge. Open source under MIT License.</p>
+          <div className="flex gap-4 text-slate-600 text-[10px]">
+            <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
+            <span>•</span>
+            <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
