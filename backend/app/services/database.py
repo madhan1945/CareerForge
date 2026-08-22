@@ -23,8 +23,21 @@ collection = db["analyses"]
 
 async def save_analysis(data: Dict) -> str:
     """Save a resume analysis to MongoDB."""
+    import os
+    persons = data.get("parsed_info", {}).get("entities", {}).get("persons", [])
+    candidate_name = data.get("candidate_name")
+    if not candidate_name:
+        candidate_name = persons[0] if persons else data.get("filename", "Candidate")
+    
+    # Clean up name if it is a filename
+    if candidate_name and any(candidate_name.lower().endswith(ext) for ext in [".pdf", ".docx", ".txt"]):
+        candidate_name = os.path.splitext(candidate_name)[0].replace("_", " ").replace("-", " ").title()
+
     document = {
         "timestamp": datetime.utcnow(),
+        "filename": data.get("filename", "Pasted Resume"),
+        "raw_text": data.get("raw_text", ""),
+        "candidate_name": candidate_name,
         "category": data.get("classification", {}).get("category"),
         "ats_score": data.get("ats_score", {}).get("overall_score"),
         "ats_grade": data.get("ats_score", {}).get("grade"),
@@ -83,3 +96,14 @@ async def get_stats() -> Dict:
         "avg_experience_years": round(stats.get("avg_experience") or 0, 1),
         "top_categories": [{"category": c["_id"], "count": c["count"]} for c in top_cats]
     }
+
+
+async def get_all_candidates() -> List[Dict]:
+    """Retrieve all candidate records from database for shortlisting."""
+    cursor = collection.find().sort("timestamp", -1)
+    candidates = []
+    async for doc in cursor:
+        doc["_id"] = str(doc["_id"])
+        doc["timestamp"] = doc["timestamp"].isoformat()
+        candidates.append(doc)
+    return candidates
