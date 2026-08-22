@@ -1,6 +1,6 @@
 import { Briefcase, History } from "lucide-react";
 
-export default function Navbar({ onHistoryClick }) {
+export default function Navbar({ onHistoryClick, currentView, onViewChange }) {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-white/10">
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -10,8 +10,33 @@ export default function Navbar({ onHistoryClick }) {
           </div>
           <span className="text-xl font-bold gradient-text">CareerForge</span>
         </div>
+
+        {/* View Switcher */}
+        <div className="flex bg-white/5 border border-white/10 rounded-xl p-0.5">
+          <button
+            onClick={() => onViewChange("candidate")}
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              currentView === "candidate"
+                ? "bg-sky-500 text-white shadow-md"
+                : "text-slate-400 hover:text-white"
+            }`}
+          >
+            Candidate Portal
+          </button>
+          <button
+            onClick={() => onViewChange("recruiter")}
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              currentView === "recruiter"
+                ? "bg-sky-500 text-white shadow-md"
+                : "text-slate-400 hover:text-white"
+            }`}
+          >
+            Recruiter Portal
+          </button>
+        </div>
+
         <div className="flex items-center gap-4">
-          <span className="text-slate-400 text-sm">AI Resume Analyzer</span>
+          <span className="text-slate-400 text-sm hide-mobile">AI Resume Analyzer</span>
           <button onClick={onHistoryClick} className="flex items-center gap-2 px-3 py-1.5 glass rounded-xl text-slate-400 hover:text-white transition-colors text-sm">
             <History size={14} />
             History
