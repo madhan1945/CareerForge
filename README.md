@@ -20,6 +20,11 @@
 </div>
 
 ---
+## 🎥 Demo
+
+https://github.com/user-attachments/assets/062fff3b-4198-455d-966f-85b8bb6ef14c
+
+---
 
 ## ✨ What is CareerForge?
 
